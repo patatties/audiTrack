@@ -1,0 +1,9 @@
+# Store text files with LF line endings in the repository; the app runs in Linux containers.
+* text=auto eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary

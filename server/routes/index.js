@@ -1,0 +1,26 @@
+// Every API route file, imported once so it registers its endpoints (see ../router.js).
+import "./health.js";
+import "./bootstrap.js";
+import "./setup.js";
+import "./backup.js";
+import "./clients.js";
+import "./locations.js";
+import "./control-catalog.js";
+import "./controls.js";
+import "./control-locations.js";
+import "./control-requirements.js";
+import "./findings.js";
+import "./remediation-plans.js";
+import "./remediation-plan-findings.js";
+import "./comments.js";
+import "./attachments.js";
+import "./notes.js";
+import "./solutions.js";
+import "./solution-controls.js";
+import "./solution-remediations.js";
+import "./texts.js";
+import "./assistant.js";
+import "./ask-ai.js";
+import "./translate.js";
+import "./translate-all.js";
+import "./generate-scoped-summary.js";

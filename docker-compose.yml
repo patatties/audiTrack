@@ -1,0 +1,63 @@
+# Runs the published image from Docker Hub (docker compose pull && docker compose up -d).
+# In a checkout of the source, `docker compose up -d --build` builds it locally instead.
+# Settings come from a .env file next to this file (not committed); see .env.example.
+services:
+  auditrack:
+    image: patatties/auditrack:latest
+    build: .
+    ports:
+      - "8081:3000"
+    environment:
+      # Optional login (HTTP Basic auth). Empty = no login.
+      AUDITRACK_USERNAME: ${AUDITRACK_USERNAME:-}
+      AUDITRACK_PASSWORD: ${AUDITRACK_PASSWORD:-}
+      # Optional token for the MCP server at /mcp (see docs/mcp.md).
+      AUDITRACK_MCP_TOKEN: ${AUDITRACK_MCP_TOKEN:-}
+      # Empty = built-in database in the auditrack-data volume. Set for PostgreSQL (see .env.example).
+      DATABASE_URL: ${DATABASE_URL:-}
+      # AI: configure one or more providers. All optional.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      # Provider/model for all AI features (default: first configured provider)
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_MODEL: ${AI_MODEL:-}
+    extra_hosts:
+      # Lets the container reach services on your machine (e.g. Ollama) as host.docker.internal.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - auditrack-data:/data # built-in database (/data/pgdata) and attachments; back up this volume
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false # only when the "postgres" profile is enabled
+    restart: unless-stopped
+
+  # Optional PostgreSQL server — only started with COMPOSE_PROFILES=postgres (see .env.example).
+  db:
+    image: postgres:17-alpine
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_DB: auditrack
+      POSTGRES_USER: auditrack
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-auditrack}
+    volumes:
+      - auditrack-db:/var/lib/postgresql/data # PostgreSQL data; back up this volume
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auditrack -d auditrack"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  auditrack-data:
+  auditrack-db:
